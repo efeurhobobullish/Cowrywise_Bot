@@ -77,10 +77,39 @@ bot.on("message", async (msg) => {
         // Check if user has joined all channels
         const joined = await hasJoinedAllChannels(userId);
 
-        if (text === "/start") {
+        // Handle /start with referral system
+        if (text.startsWith("/start")) {
+            const args = text.split(" ");
+            let referrerId = args.length > 1 ? args[1] : null;
+
             if (!joined) {
                 await startCommand(bot, msg);
             } else {
+                // Handle referral if the user was invited
+                if (referrerId && referrerId !== userId.toString()) {
+                    try {
+                        let referrer = await User.findOne({ userId: referrerId });
+                        let newUser = await User.findOne({ userId });
+
+                        if (!newUser) {
+                            newUser = new User({ userId, referrerId });
+                            await newUser.save();
+
+                            if (referrer) {
+                                referrer.referrals.push(userId);
+                                await referrer.save();
+
+                                bot.sendMessage(
+                                    referrerId,
+                                    `🎉 Someone just joined using your referral link! You now have *${referrer.referrals.length}* referrals.`,
+                                    { parse_mode: "Markdown" }
+                                );
+                            }
+                        }
+                    } catch (error) {
+                        console.error("❌ Error tracking referral:", error.message);
+                    }
+                }
                 await mainCommand(bot, msg);
             }
         } else if (text === "/joined") {
@@ -107,7 +136,6 @@ bot.on("message", async (msg) => {
         console.error("❌ Error handling message:", error.message);
     }
 });
-
 
 // Handle "✅ Joined" button clicks
 bot.on("callback_query", async (callback) => {
