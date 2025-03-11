@@ -7,5 +7,6 @@ module.exports = {
     OWNER_USERNAME: "only_one_empire",
     OWNER_CAPTION: "© 2025–2026 𝖤𝗆𝗉𝗂𝗋𝖾 𝖳𝖾𝖼𝗁",
     ADMIN_ID: "7128227681",
-    CHANNELS: ["@cowrywise_gaming_channel"]
+    CHANNELS: ["@cowrywise_gaming_channel"],
+    MONGO_URL: "mongodb+srv://empirepayvtu:empirevtu1@empirepayvtu.mygpq.mongodb.net/?retryWrites=true&w=majority&appName=empirepayvtu"
 };
