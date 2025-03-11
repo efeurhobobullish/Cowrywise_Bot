@@ -16,3 +16,4 @@ fs.readdirSync(pluginsPath).forEach(file => {
 });
 
 console.log("🤖 Bot is running...");
+
