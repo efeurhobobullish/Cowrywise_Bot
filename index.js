@@ -13,6 +13,9 @@ const checkCommand = require("./plugins/check");
 const mainCommand = require("./plugins/main");
 const main2Command = require("./plugins/main2"); // Handles "More"
 const backCommand = require("./plugins/back");
+const referCommand = require("./plugins/refer");
+
+
 
 const app = express();
 app.use(express.json());
@@ -92,6 +95,8 @@ bot.on("message", async (msg) => {
             await backCommand(bot, msg);
         } else if (text === "🗃 More") { // Fixed case sensitivity
             await main2Command(bot, msg);
+        } else if (text === "👬 Refer") { // Correct placement
+            await referCommand(bot, msg);
         }
 
         // Reset user state after 2 seconds
@@ -102,6 +107,7 @@ bot.on("message", async (msg) => {
         console.error("❌ Error handling message:", error.message);
     }
 });
+
 
 // Handle "✅ Joined" button clicks
 bot.on("callback_query", async (callback) => {
