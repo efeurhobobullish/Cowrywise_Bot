@@ -61,7 +61,7 @@ bot.on("message", async (msg) => {
     try {
         const chatId = msg.chat.id;
         const userId = msg.from.id;
-        const text = msg.text?.toLowerCase(); // Normalize text input
+        const text = msg.text; // Keep original case
 
         // Prevent spam clicking
         if (userState[userId]) return;
@@ -86,9 +86,9 @@ bot.on("message", async (msg) => {
             }
         } else if (text === "/check") {
             await checkCommand(bot, msg);
-        } else if (text === "🔙 Back") {
+        } else if (text === "🔙 Back") { // Fixed case sensitivity
             await backCommand(bot, msg);
-        } else if (text === "🗃 More") { 
+        } else if (text === "🗃 More") { // Fixed case sensitivity
             await main2Command(bot, msg);
         }
 
