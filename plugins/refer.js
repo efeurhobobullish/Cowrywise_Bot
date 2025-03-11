@@ -3,22 +3,25 @@ const User = require("../models/user");
 module.exports = async (bot, msg) => {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
-    const botUsername = (await bot.getMe()).username;
-    const referralLink = `https://t.me/${botUsername}?start=${userId}`;
 
     try {
-        // Fetch user from DB
+        // Get bot username (it already includes underscores if needed)
+        const botInfo = await bot.getMe();
+        const botUsername = botInfo.username; 
+        const referralLink = `https://t.me/${botUsername}?start=${userId}`;
+
+        // Fetch or create user in DB
         let user = await User.findOne({ userId });
         if (!user) {
-            user = new User({ userId });
+            user = new User({ userId, referrals: [] }); // Ensure referrals array exists
             await user.save();
         }
 
         // Count referrals
-        const referralCount = user.referrals.length;
+        const referralCount = user.referrals ? user.referrals.length : 0;
 
         // Send referral message
-        bot.sendMessage(
+        await bot.sendMessage(
             chatId,
             `👬 *Referral Program*\n\n` +
             `🎉 Total Referrals: *${referralCount}*\n\n` +
@@ -28,6 +31,6 @@ module.exports = async (bot, msg) => {
         );
     } catch (error) {
         console.error("❌ Error in refer.js:", error.message);
-        bot.sendMessage(chatId, "❌ An error occurred. Please try again.");
+        await bot.sendMessage(chatId, "❌ An error occurred. Please try again.");
     }
 };
