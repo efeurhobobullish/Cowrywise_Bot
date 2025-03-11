@@ -2,7 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const config = require("./config");
 
-const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { webhook: true });
+const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { webHook: true });
 
 const startCommand = require("./plugins/start");
 const joinedCommand = require("./plugins/joined");
@@ -13,7 +13,7 @@ const backCommand = require("./plugins/back");
 const app = express();
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("✅ Bot is running"));
+app.get("/", (req, res) => res.send("✅ Bot is running..."));
 
 app.post(`/webhook/${config.TELEGRAM_BOT_TOKEN}`, (req, res) => {
     bot.processUpdate(req.body);
@@ -26,36 +26,37 @@ app.listen(config.PORT, async () => {
 
     // Set webhook
     const webhookUrl = `${config.RENDER_URL}/webhook/${config.TELEGRAM_BOT_TOKEN}`;
-    
     try {
-        const setWebhookResponse = await bot.setWebhook(webhookUrl);
-        if (setWebhookResponse) {
-            console.log(`✅ Webhook set successfully: ${webhookUrl}`);
-        } else {
-            console.error("❌ Failed to set webhook. API response was empty.");
-        }
+        await bot.setWebHook(webhookUrl);
+        console.log(`✅ Webhook set: ${webhookUrl}`);
     } catch (error) {
-        console.error("❌ Webhook setup error:", error);
+        console.error("❌ Failed to set webhook:", error.message);
     }
 });
 
-// Error handling
-bot.on("polling_error", (error) => console.error("❌ Polling Error:", error));
-
+// Handle incoming messages
 bot.on("message", async (msg) => {
     try {
         const text = msg.text;
-        if (!text) return;
 
         if (text === "/start") return startCommand(bot, msg);
         if (text === "/joined") return joinedCommand(bot, msg);
         if (text === "/check") return checkCommand(bot, msg);
         if (text === "🔙 back") return backCommand(bot, msg);
-
     } catch (error) {
-        console.error("❌ Error handling message:", error);
-        await bot.sendMessage(msg.chat.id, "❌ An error occurred. Please try again.");
+        console.error("❌ Error handling message:", error.message);
     }
 });
 
-console.log("✅ Bot is fully running...");
+// Handle "✅ Joined" button clicks
+bot.on("callback_query", async (callback) => {
+    try {
+        if (callback.data === "joined") {
+            await checkCommand(bot, callback.message);
+        }
+    } catch (error) {
+        console.error("❌ Error handling callback query:", error.message);
+    }
+});
+
+console.log("✅ Bot is running...");
