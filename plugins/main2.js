@@ -29,12 +29,12 @@ module.exports = async (bot, msg) => {
     };
 
     if (userId.toString() === ADMIN_ID) {
-        await bot.sendMessage(chatId, "*WELCOME TO SECOND MENU*", {
+        await bot.sendMessage(chatId, "*Welcome to Additional Menu 🗃*", {
             parse_mode: "Markdown",
             ...adminKeyboard
         });
     } else {
-        await bot.sendMessage(chatId, "*WELCOME TO SECOND MENU*", {
+        await bot.sendMessage(chatId, "*Welcome to Additional Menu 🗃*", {
             parse_mode: "Markdown",
             ...userKeyboard
         });
