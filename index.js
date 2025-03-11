@@ -2,8 +2,22 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const config = require("./config");
 
-const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { webHook: true });
+const app = express();
 
+app.use(express.json()); // Parse JSON
+
+// Set webhook (replace YOUR_RENDER_URL once deployed)
+const webhookURL = `https://cowrywise-bot.onrender.com/webhook`;
+bot.setWebHook(webhookURL);
+
+// Handle incoming updates
+app.post("/webhook", (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+});
+
+// Import commands
 const startCommand = require("./commands/start");
 const joinedCommand = require("./commands/joined");
 const checkCommand = require("./commands/check");
@@ -19,12 +33,10 @@ bot.on("message", async (msg) => {
     if (text === "🔙 back") return backCommand(bot, msg);
 });
 
-// Express Server (Optional, for Vercel)
-const app = express();
+// Root route (for testing)
 app.get("/", (req, res) => res.send("Bot is running"));
-app.listen(config.PORT, () => console.log(`Server running on port ${config.PORT}`));
 
-// Error Handling
-bot.on("polling_error", (error) => console.log(error.message));
+// Start server
+app.listen(config.PORT, () => console.log(`🚀 Server running on port ${config.PORT}`));
 
 console.log("✅ Bot is running...");
