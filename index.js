@@ -9,6 +9,7 @@ const startCommand = require("./plugins/start");
 const joinedCommand = require("./plugins/joined");
 const checkCommand = require("./plugins/check");
 const mainCommand = require("./plugins/main");
+const main2Command = require("./plugins/main2"); // Added main2.js
 const backCommand = require("./plugins/back");
 
 const app = express();
@@ -87,6 +88,8 @@ bot.on("message", async (msg) => {
             await checkCommand(bot, msg);
         } else if (text === "🔙 back") {
             await backCommand(bot, msg);
+        } else if (text === "🗃 more") {
+            await main2Command(bot, msg);
         }
 
         // Reset user state after 2 seconds
