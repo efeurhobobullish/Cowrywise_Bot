@@ -10,9 +10,13 @@ module.exports = async (bot, msg) => {
         const botUsername = botInfo.username;
 
         // Escape special characters for MarkdownV2
-        const escapedUsername = botUsername.replace(/[_*[\]()~`>#+-=|{}.!]/g, "\\$&");
-        const referralLink = `https://t.me/${escapedUsername}?start=${userId}`;
-        const formattedLink = `[Click Here](${referralLink})`;
+        const escapeMarkdownV2 = (text) => {
+            return text.replace(/[_*[\]()~`>#+-=|{}.!]/g, "\\$&");
+        };
+
+        const escapedUsername = escapeMarkdownV2(botUsername);
+        const referralLink = `https://t.me/${botUsername}?start=${userId}`;
+        const formattedLink = `[Click Here](${escapeMarkdownV2(referralLink)})`;
 
         console.log("✅ Bot Username:", botUsername);
         console.log("✅ Escaped Username:", escapedUsername);
@@ -40,7 +44,7 @@ module.exports = async (bot, msg) => {
             `👬 *Referral Program*\n\n` +
             `🎉 Total Referrals: *${referralCount}*\n\n` +
             `🔗 Your Referral Link:\n${formattedLink}\n\n` +
-            `📢 Invite friends and earn rewards!`,
+            `📢 Invite friends and earn rewards\\!`,
             { parse_mode: "MarkdownV2" } // Fixes formatting issues
         );
 
