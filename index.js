@@ -2,27 +2,13 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const config = require("./config");
 
-const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { webHook: true });
-const app = express();
+const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { polling: false }); // Webhook mode
 
-app.use(express.json()); // Parse JSON
-
-// Set webhook (replace YOUR_RENDER_URL once deployed)
-const webhookURL = `https://cowrywise-bot.onrender.com/webhook`;
-bot.setWebHook(webhookURL);
-
-// Handle incoming updates
-app.post("/webhook", (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-});
-
-// Import commands
-const startCommand = require("./commands/start");
-const joinedCommand = require("./commands/joined");
-const checkCommand = require("./commands/check");
-const mainCommand = require("./commands/main");
-const backCommand = require("./commands/back");
+const startCommand = require("./plugins/start");
+const joinedCommand = require("./plugins/joined");
+const checkCommand = require("./plugins/check");
+const mainCommand = require("./plugins/main");
+const backCommand = require("./plugins/back");
 
 bot.on("message", async (msg) => {
     const text = msg.text;
@@ -33,10 +19,32 @@ bot.on("message", async (msg) => {
     if (text === "🔙 back") return backCommand(bot, msg);
 });
 
-// Root route (for testing)
+// Express Server for Webhook
+const app = express();
+app.use(express.json());
+
 app.get("/", (req, res) => res.send("Bot is running"));
 
-// Start server
-app.listen(config.PORT, () => console.log(`🚀 Server running on port ${config.PORT}`));
+app.post(`/webhook/${config.TELEGRAM_BOT_TOKEN}`, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+});
+
+// Start the server
+app.listen(config.PORT, async () => {
+    console.log(`✅ Server running on port ${config.PORT}`);
+
+    // Set webhook URL for Telegram
+    const webhookUrl = `${config.RENDER_URL}/webhook/${config.TELEGRAM_BOT_TOKEN}`;
+    try {
+        await bot.setWebhook(webhookUrl);
+        console.log(`✅ Webhook set: ${webhookUrl}`);
+    } catch (error) {
+        console.error("❌ Failed to set webhook:", error.message);
+    }
+});
+
+// Error Handling
+bot.on("polling_error", (error) => console.log("❌ Polling error:", error.message));
 
 console.log("✅ Bot is running...");
