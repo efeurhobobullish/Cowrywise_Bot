@@ -1,27 +1,33 @@
-const User = require("../database"); // Import User model
+const User = require("../models/user");
 
 module.exports = async (bot, msg) => {
+    const userId = msg.from.id;
+    const chatId = msg.chat.id;
+    const botUsername = (await bot.getMe()).username;
+    const referralLink = `https://t.me/${botUsername}?start=${userId}`;
+
     try {
-        const userId = msg.from.id;
-        const chatId = msg.chat.id;
-        const botUsername = (await bot.getMe()).username;
+        // Fetch user from DB
+        let user = await User.findOne({ userId });
+        if (!user) {
+            user = new User({ userId });
+            await user.save();
+        }
 
-        // Generate referral link
-        const inviteLink = `https://t.me/${botUsername}?start=${userId}`;
+        // Count referrals
+        const referralCount = user.referrals.length;
 
-        // Get user's referral count
-        const user = await User.findOne({ userId });
-        const refCount = user ? user.referrals.length : 0;
-
-        // Send referral information
-        await bot.sendMessage(chatId, 
-            `<b>🙌🏻 Total Referrals: ${refCount} User(s)\n\n` +
-            `🙌🏻 Your Invite Link: ${inviteLink}\n\n` +
-            `🪢 Invite to Earn ₦100 Per Invite</b>`, 
-            { parse_mode: "HTML", disable_web_page_preview: true }
+        // Send referral message
+        bot.sendMessage(
+            chatId,
+            `👬 *Referral Program*\n\n` +
+            `🎉 Total Referrals: *${referralCount}*\n\n` +
+            `🔗 Your Referral Link:\n${referralLink}\n\n` +
+            `📢 Invite friends and earn rewards!`,
+            { parse_mode: "Markdown" }
         );
-
     } catch (error) {
-        console.error("❌ Error in refer command:", error.message);
+        console.error("❌ Error in refer.js:", error.message);
+        bot.sendMessage(chatId, "❌ An error occurred. Please try again.");
     }
 };
