@@ -2,6 +2,8 @@ const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const axios = require("axios");
 const config = require("./config");
+const connectDB = require("./database"); // Import database connection
+connectDB();
 
 const bot = new TelegramBot(config.TELEGRAM_BOT_TOKEN, { webHook: true });
 
