@@ -86,9 +86,9 @@ bot.on("message", async (msg) => {
             }
         } else if (text === "/check") {
             await checkCommand(bot, msg);
-        } else if (text === "🔙 back") {
+        } else if (text === "🔙 Back") {
             await backCommand(bot, msg);
-        } else if (text === "🗃 more") { // "More" button redirects to main2.js
+        } else if (text === "🗃 More") { // "More" button redirects to main2.js
             await main2Command(bot, msg);
         }
 
