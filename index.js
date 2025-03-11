@@ -34,7 +34,7 @@ app.listen(config.PORT, async () => {
     }
 });
 
-// Store user data to prevent duplicate clicks
+// Store user state to prevent spam clicking
 const userState = {};
 
 // Function to check if user has joined all required channels
@@ -62,38 +62,34 @@ bot.on("message", async (msg) => {
         const userId = msg.from.id;
         const text = msg.text;
 
-        // Prevent duplicate clicks
-        if (userState[userId] && userState[userId].clicking) {
-            return bot.sendMessage(chatId, "⏳ Please wait before trying again.");
-        }
-        userState[userId] = { clicking: true };
+        // Prevent spam clicking
+        if (userState[userId]) return;
 
-        // Check if user has joined all channels before allowing access
+        // Set user as active
+        userState[userId] = true;
+
+        // Check if user has joined all channels
         const joined = await hasJoinedAllChannels(userId);
 
         if (text === "/start") {
             if (!joined) {
-                return startCommand(bot, msg);
+                await startCommand(bot, msg);
+            } else {
+                await mainCommand(bot, msg);
             }
-            return mainCommand(bot, msg);
-        }
-
-        if (text === "/joined") {
+        } else if (text === "/joined") {
             if (!joined) {
-                return bot.sendMessage(chatId, "❌ You have not joined all required channels. Please join and try again.");
+                await bot.sendMessage(chatId, "❌ You have not joined all required channels. Please join first.");
+            } else {
+                await joinedCommand(bot, msg);
             }
-            return joinedCommand(bot, msg);
+        } else if (text === "/check") {
+            await checkCommand(bot, msg);
+        } else if (text === "🔙 back") {
+            await backCommand(bot, msg);
         }
 
-        if (text === "/check") {
-            return checkCommand(bot, msg);
-        }
-
-        if (text === "🔙 back") {
-            return backCommand(bot, msg);
-        }
-
-        // Reset user state after processing
+        // Reset user state after 2 seconds
         setTimeout(() => {
             delete userState[userId];
         }, 2000);
@@ -108,24 +104,26 @@ bot.on("callback_query", async (callback) => {
         const userId = callback.from.id;
         const chatId = callback.message.chat.id;
 
-        // Prevent duplicate clicks
-        if (userState[userId] && userState[userId].clicking) {
-            return bot.answerCallbackQuery(callback.id, { text: "⏳ Please wait before trying again.", show_alert: true });
-        }
-        userState[userId] = { clicking: true };
+        // Prevent spam clicking
+        if (userState[userId]) return;
+
+        // Set user as active
+        userState[userId] = true;
 
         // Check if user has joined all channels
         const joined = await hasJoinedAllChannels(userId);
 
         if (!joined) {
-            return bot.answerCallbackQuery(callback.id, { text: "❌ You have not joined all required channels. Please join first.", show_alert: true });
+            await bot.answerCallbackQuery(callback.id, {
+                text: "❌ You have not joined all required channels. Please join first.",
+                show_alert: true
+            });
+        } else {
+            await bot.answerCallbackQuery(callback.id);
+            await mainCommand(bot, callback.message);
         }
 
-        // If joined, proceed to main menu
-        await bot.answerCallbackQuery(callback.id);
-        await mainCommand(bot, callback.message);
-
-        // Reset user state after processing
+        // Reset user state after 2 seconds
         setTimeout(() => {
             delete userState[userId];
         }, 2000);
