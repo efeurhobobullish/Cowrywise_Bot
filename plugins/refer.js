@@ -8,9 +8,14 @@ module.exports = async (bot, msg) => {
         // Get bot username
         const botInfo = await bot.getMe();
         const botUsername = botInfo.username;
-        const referralLink = `https://t.me/${botUsername}?start=${userId}`;
+
+        // Escape special characters for MarkdownV2
+        const escapedUsername = botUsername.replace(/[_*[\]()~`>#+-=|{}.!]/g, "\\$&");
+        const referralLink = `https://t.me/${escapedUsername}?start=${userId}`;
+        const formattedLink = `[Click Here](${referralLink})`;
 
         console.log("✅ Bot Username:", botUsername);
+        console.log("✅ Escaped Username:", escapedUsername);
         console.log("✅ Referral Link:", referralLink);
 
         // Fetch or create user
@@ -29,9 +34,6 @@ module.exports = async (bot, msg) => {
         // Count referrals
         const referralCount = user.referrals.length;
 
-        // Format the link to prevent bending
-        const formattedLink = `[${referralLink}](${referralLink})`;
-
         // Send referral message
         await bot.sendMessage(
             chatId,
@@ -39,7 +41,7 @@ module.exports = async (bot, msg) => {
             `🎉 Total Referrals: *${referralCount}*\n\n` +
             `🔗 Your Referral Link:\n${formattedLink}\n\n` +
             `📢 Invite friends and earn rewards!`,
-            { parse_mode: "MarkdownV2" } // Ensures the link is displayed correctly
+            { parse_mode: "MarkdownV2" } // Fixes formatting issues
         );
 
         console.log("✅ Referral message sent successfully.");
