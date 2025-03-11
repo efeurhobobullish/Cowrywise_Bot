@@ -88,7 +88,7 @@ bot.on("message", async (msg) => {
             await checkCommand(bot, msg);
         } else if (text === "🔙 back") {
             await backCommand(bot, msg);
-        } else if (text === "🗃 more") {
+        } else if (text === "🗃 more") { // Added support for "More"
             await main2Command(bot, msg);
         }
 
