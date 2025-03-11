@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-    telegramId: { type: String, unique: true, required: true },
-    balance: { type: Number, default: 0 },
-    referrals: { type: Number, default: 0 },
-    referredBy: { type: String, default: null }
+    userId: { type: Number, required: true, unique: true },
+    balance: { type: Number, default: 0.00 },
+    referrals: { type: [Number], default: [] } // Store referred user IDs
 });
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
