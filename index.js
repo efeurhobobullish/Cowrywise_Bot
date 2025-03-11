@@ -9,7 +9,7 @@ const startCommand = require("./plugins/start");
 const joinedCommand = require("./plugins/joined");
 const checkCommand = require("./plugins/check");
 const mainCommand = require("./plugins/main");
-const main2Command = require("./plugins/main2"); // Added main2.js
+const main2Command = require("./plugins/main2"); // Handles "More"
 const backCommand = require("./plugins/back");
 
 const app = express();
@@ -61,7 +61,7 @@ bot.on("message", async (msg) => {
     try {
         const chatId = msg.chat.id;
         const userId = msg.from.id;
-        const text = msg.text;
+        const text = msg.text?.toLowerCase(); // Normalize text input
 
         // Prevent spam clicking
         if (userState[userId]) return;
@@ -88,7 +88,7 @@ bot.on("message", async (msg) => {
             await checkCommand(bot, msg);
         } else if (text === "🔙 back") {
             await backCommand(bot, msg);
-        } else if (text === "🗃 more") { // Added support for "More"
+        } else if (text === "🗃 more") { // "More" button redirects to main2.js
             await main2Command(bot, msg);
         }
 
