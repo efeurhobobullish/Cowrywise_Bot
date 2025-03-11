@@ -1,22 +1,28 @@
+const axios = require("axios");
+const config = require("../config");
+const mainCommand = require("../plugins/main");
+
 module.exports = async (bot, msg) => {
-    const content = msg.text;
-    if (!content) return;
+    const userId = msg.from.id;
+    const channels = config.CHANNELS;
 
     try {
-        const { status, is_joined } = JSON.parse(content);
+        const response = await axios.get(`https://membership.bjcoderx.workers.dev/?bot_token=${config.TELEGRAM_BOT_TOKEN}&user_id=${userId}&chat_id=${encodeURIComponent(JSON.stringify(channels))}`);
+        const { status, is_joined } = response.data;
 
         if (status === "false") {
-            return bot.sendMessage(msg.chat.id, "⚠️ *Please make the bot an admin on all channels.*", { parse_mode: "Markdown" });
+            return bot.sendMessage(userId, "❌ *Please make the bot an admin on all required channels.*");
         }
 
         if (is_joined) {
-            await bot.sendMessage(msg.chat.id, "✅ *Thank you for joining our channels!*", { parse_mode: "Markdown" });
-            bot.runCommand("main");
+            bot.sendMessage(userId, "✅ *Thank you for joining! Loading main menu...*");
+            return mainCommand(bot, msg);
         } else {
-            await bot.sendMessage(msg.chat.id, "⚠️ *You need to join all channels to use this bot.*", { parse_mode: "Markdown" });
+            return bot.sendMessage(userId, "⚠️ *You need to join all channels to continue.*", {
+                reply_markup: { inline_keyboard: [[{ text: "📢 Join Channels", url: "https://t.me/" + channels[0].replace("@", "") }]] }
+            });
         }
     } catch (error) {
-        console.error("Error processing check command:", error);
-        await bot.sendMessage(msg.chat.id, "❌ *An error occurred. Try again later.*", { parse_mode: "Markdown" });
+        return bot.sendMessage(userId, "❌ *An error occurred. Try again later.*");
     }
 };
