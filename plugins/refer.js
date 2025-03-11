@@ -5,23 +5,19 @@ module.exports = async (bot, msg) => {
     const chatId = msg.chat.id;
 
     try {
-        // Get bot information
+        // Get bot username
         const botInfo = await bot.getMe();
-        const botUsername = botInfo.username; // Ensure it includes underscores
+        const botUsername = botInfo.username;
         const referralLink = `https://t.me/${botUsername}?start=${userId}`;
 
         console.log("✅ Bot Username:", botUsername);
         console.log("✅ Referral Link:", referralLink);
 
-        // Fetch user from DB
+        // Fetch or create user
         let user = await User.findOne({ userId });
-
         if (!user) {
-            console.log("❌ User not found, creating a new one...");
-            user = new User({ userId, referrals: [] }); // Ensure referrals array exists
+            user = new User({ userId, referrals: [] });
             await user.save();
-        } else {
-            console.log("✅ User found in database.");
         }
 
         // Ensure referrals array exists
@@ -33,14 +29,17 @@ module.exports = async (bot, msg) => {
         // Count referrals
         const referralCount = user.referrals.length;
 
+        // Format the link to prevent bending
+        const formattedLink = `[${referralLink}](${referralLink})`;
+
         // Send referral message
         await bot.sendMessage(
             chatId,
             `👬 *Referral Program*\n\n` +
             `🎉 Total Referrals: *${referralCount}*\n\n` +
-            `🔗 Your Referral Link:\n${referralLink}\n\n` +
+            `🔗 Your Referral Link:\n${formattedLink}\n\n` +
             `📢 Invite friends and earn rewards!`,
-            { parse_mode: "Markdown" }
+            { parse_mode: "MarkdownV2" } // Ensures the link is displayed correctly
         );
 
         console.log("✅ Referral message sent successfully.");
