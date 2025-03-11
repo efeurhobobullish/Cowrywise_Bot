@@ -1,0 +1,25 @@
+services:
+  - name: cowrywise-bot
+    type: web
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node index.js"
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: "7637161395:AAF6T9HsFUi3qCFMmC2ZxR1Me0oITZrLsOY"
+      - key: PORT
+        value: "3000"
+      - key: OWNER_NAME
+        value: "𝖤𝗆𝗉𝗂𝗋𝖾 𝖳𝖾𝖼𝗁"
+      - key: OWNER_NUMBER
+        value: "+2348144250768"
+      - key: OWNER_USERNAME
+        value: "only_one_empire"
+      - key: OWNER_CAPTION
+        value: "© 2025–2026 𝖤𝗆𝗉𝗂𝗋𝖾 𝖳𝖾𝖼𝗁"
+      - key: ADMIN_ID
+        value: "7128227681"
+      - key: CHANNELS
+        value: "@cowrywise_gaming_channel"
